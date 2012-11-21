@@ -1,0 +1,3 @@
+# InfoVis Project
+
+Quick tip: You'll need a webserver running to serve these files.  If you don't, JavaScript will complain about XHR issues.  If you're running a Mac, it's as easy as `python -m SimpleHTTPServer` from the project directory.  If you're running Windows, figure it out yourself...
