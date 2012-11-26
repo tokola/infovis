@@ -1,20 +1,47 @@
 <html>
 	<head>
 		<title>D3 Tests</title>
+		<link rel="stylesheet" href="reset.css" type="text/css">
 		<script type="text/javascript" src="d3/d3.v2.js"></script>
 		<style type="text/css">
+			body {
+				text-align: center;
+			}
 		</style>
 	</head>
 	<body>		
 		<script type="text/javascript">
-			// Drawing dimensions
-			var w = 2560;
-			var h = 2048;
+			// Overall dimensions
+			var outerMargin = 30;
+			var w = window.innerWidth - (outerMargin * 2);
+			var h = window.innerHeight - (outerMargin * 2);
+			
+			// Bubble view properties
+			var bubbleView = {
+				width: w - 200,
+				height: 0.6 * h
+			};
+			
+			// Bar view properties
+			var barView = {
+				width: w - 200,
+				height: h - bubbleView.height
+			};
+			
+			console.log("h: " + h);
+			console.log("bubbleView.height: " + bubbleView.height);
+			console.log("barView.height: " + barView.height);
 			
 			// General university data
 			var maximumTuition = 0;
 			var minimumTuition = 0;
 			var universities;
+			
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h)
+						.attr("fill", "grey");
 			
 			// Get university data from CSV
 			d3.csv("./colleges.csv", function(csv) {
@@ -71,39 +98,70 @@
 				// console.log("\t" + ": " + university.undergrads + ":" + university.grads + ":" + university.total_faculty);
 			};
 			
-			var universityCharts;
+			// var stackedCharts;
 			
-			// Continue page setup after data has been loaded and parsed
-			var afterDataLoad = function() {
-				universityCharts = svg.selectAll("g")
+			var buildBubbles = function() {
+				var bubbleCharts = svg.append("g")
+					.attr("id", "bubbles").attr("transform", "translate(0, "+outerMargin+")");
+				
+				bubbleCharts.append("rect")
+					.attr("width", bubbleView.width)
+					.attr("height", bubbleView.height);
+			};
+			
+			var buildStackedCharts = function() {				
+				var regionMargin = 2;
+				
+				var localY = bubbleView.height + outerMargin + regionMargin;
+				
+				var stackedCharts = svg.append("g")
+					.attr("id", "stackedCharts")
+					.attr("transform", "translate(0,"+localY+")");
+				
+				var stackedChartRegions = stackedCharts.selectAll("g")
 					.data(universities)
 					.enter()
 					.append("g");
 				
-				universityCharts.attr("transform", function(d, i) {
-					return "translate("+(55*i)+",0)";
+				var regionWidth = barView.width / universities.length;
+				
+				stackedChartRegions.attr("transform", function(d, i) {
+					return "translate("+(regionWidth*i)+",0)";
 				});
 				
-				universityCharts.append("rect")
+				stackedChartRegions.append("image")
 					.attr("x", 0)
 					.attr("y", 0)
-					.attr("height", 50)
-					.attr("width", 50)
+					.attr("height", regionWidth - regionMargin)
+					.attr("width", regionWidth - regionMargin)
+					.attr("xlink:href", function(d) { return d.logo; });
+				
+				var chartRegionHeight = ((barView.height - regionWidth - regionMargin - outerMargin) / 2);
+				
+				console.log("chartRegionHeight: " + chartRegionHeight);
+				
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate(0,"+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", chartRegionHeight - regionMargin)
+					.attr("width", regionWidth - regionMargin)
 					.attr("fill", "blue");
 				
-				universityCharts.append("rect")
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate(0,"+(regionWidth+chartRegionHeight)+")")
 					.attr("x", 0)
-					.attr("y", 50)
-					.attr("height", 50)
-					.attr("width", 50)
+					.attr("y", 0)
+					.attr("height", chartRegionHeight - regionMargin)
+					.attr("width", regionWidth - regionMargin)
 					.attr("fill", "red");
 			};
 			
-			var svg = d3.select("body")
-						.append("svg")
-						.attr("width", w)
-						.attr("height", h)
-						.attr("fill", "grey");
+			// Continue page setup after data has been loaded and parsed
+			var afterDataLoad = function() {
+				buildBubbles();
+				buildStackedCharts();
+			};
 			
 			// var data = d3.nest().key(function(d) { return d.name; } ).sortKeys(d3.ascending).entries(universities);
 			
