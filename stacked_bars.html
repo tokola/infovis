@@ -140,11 +140,14 @@
 				
 				console.log("chartRegionHeight: " + chartRegionHeight);
 				
+				var ratioChartHeight = chartRegionHeight - regionMargin;
+				var ratioBarWidth = 
+				
 				stackedChartRegions.append("rect")
 					.attr("transform", "translate(0,"+regionWidth+")")
 					.attr("x", 0)
 					.attr("y", 0)
-					.attr("height", chartRegionHeight - regionMargin)
+					.attr("height", function(d) { return ratioChartHeight * d.white; })
 					.attr("width", regionWidth - regionMargin)
 					.attr("fill", "blue");
 				
