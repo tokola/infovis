@@ -18,13 +18,13 @@
 			
 			// Bubble view properties
 			var bubbleView = {
-				width: w - 200,
+				width: w,
 				height: 0.6 * h
 			};
 			
 			// Bar view properties
 			var barView = {
-				width: w - 200,
+				width: w,
 				height: h - bubbleView.height
 			};
 			
@@ -74,7 +74,7 @@
 		var totalPeople = +university.total_faculty + +university.undergrads + +university.grads;
 		// console.log("\tTotal people: " + totalPeople);
 		university.salary = +university.salary;
-		console.log("salary:"+university.salary);
+		//console.log("salary:"+university.salary);
 		university.fees = +university.fees;
 		university.total_faculty = +university.total_faculty / totalPeople;
 		university.undergrads = +university.undergrads / totalPeople;
@@ -94,6 +94,8 @@
 		university.unknown_race = +university.unknown_race / 100;
 		university.white = +university.white / 100;
 		university.mixed_race = +university.mixed_race / 100;
+		university.other = +university.other / 100;
+		console.log("other:"+university.other);
 		university.male = +university.male / 100;
 		university.female = +university.female / 100;
 		university.id = parseInt(university.id);
@@ -156,27 +158,40 @@
 		.attr("y", 0)
 		.attr("height", function(d) { return ratioChartHeight * d.undergrads; })
 		.attr("width", ratioBarWidth)
-		.attr("fill", "green");
-		
-		var off=function(d) { return ratioChartHeight * d.undergrads; }
-		console.log("offset: " + function(d) { return ratioChartHeight * d.undergrads; });
+		.attr("fill", "rgb(150,235,0)");
 		
 		stackedChartRegions.append("rect")
-		.attr("transform", "translate(0,"+regionWidth+(function(d) { return ratioChartHeight * d.undergrads; })+")")
+		.attr("transform", function(d) {return "translate(0,"+ (regionWidth + ratioChartHeight * d.undergrads) +")";})
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("height", function(d) { return ratioChartHeight * d.grads; })
 		.attr("width", ratioBarWidth)
-		.attr("fill", "brown");
+		.attr("fill", "rgb(222,222,40)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) {return "translate(0,"+ (regionWidth + ratioChartHeight * d.undergrads + ratioChartHeight * d.grads) +")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.total_faculty; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "rgb(235,160,40)");
 		
 		// male/female ratio
 		stackedChartRegions.append("rect")
 		.attr("transform", "translate("+ratioBarWidth+","+regionWidth+")")
 		.attr("x", 0)
 		.attr("y", 0)
-		.attr("height", function(d) { return ratioChartHeight * d.in_state; })
+		.attr("height", function(d) { return ratioChartHeight * d.male; })
 		.attr("width", ratioBarWidth)
-		.attr("fill", "blue");
+		.attr("fill", "rgb(150,210,250)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+ratioBarWidth+","+(regionWidth+ratioChartHeight * d.male)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.female; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "pink");
 		
 		// residence ratio
 		stackedChartRegions.append("rect")
@@ -185,7 +200,23 @@
 		.attr("y", 0)
 		.attr("height", function(d) { return ratioChartHeight * d.in_state; })
 		.attr("width", ratioBarWidth)
-		.attr("fill", "pink");
+		.attr("fill", "rgb(240,100,130)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+(ratioBarWidth*2)+","+(regionWidth+ratioChartHeight * d.in_state)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.out_of_state; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "rgb(170,160,210)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+(ratioBarWidth*2)+","+(regionWidth+ratioChartHeight * d.in_state + ratioChartHeight * d.out_of_state)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.international; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "purple");
 		
 		// ethnicity ratio
 		stackedChartRegions.append("rect")
@@ -194,7 +225,39 @@
 		.attr("y", 0)
 		.attr("height", function(d) { return ratioChartHeight * d.white; })
 		.attr("width", ratioBarWidth)
-		.attr("fill", "gray");
+		.attr("fill", "rgb(220,220,220)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+ratioBarWidth*3+","+(regionWidth+ratioChartHeight * d.white)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.hispanic; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "rgb(180,130,80)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+ratioBarWidth*3+","+(regionWidth+ratioChartHeight * d.white + ratioChartHeight * d.hispanic)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.asian; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "rgb(255,240,80)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+ratioBarWidth*3+","+(regionWidth+ratioChartHeight * d.white + ratioChartHeight * d.hispanic+ratioChartHeight * d.asian)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.nonresident_alien; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "rgb(60,160,60)");
+		
+		stackedChartRegions.append("rect")
+		.attr("transform", function(d) { return "translate("+ratioBarWidth*3+","+(regionWidth+ratioChartHeight * d.white + ratioChartHeight * d.hispanic+ratioChartHeight * d.asian+ratioChartHeight * d.nonresident_alien)+")";})
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("height", function(d) { return ratioChartHeight * d.other; })
+		.attr("width", ratioBarWidth)
+		.attr("fill", "black");
 		
 		// average faculty salary
 		stackedChartRegions.append("rect")
