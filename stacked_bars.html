@@ -9,7 +9,7 @@
 			}
 		</style>
 	</head>
-	<body>	
+	<body>
 		<script type="text/javascript">
 			// Overall dimensions
 			var outerMargin = 30;
@@ -42,34 +42,34 @@
 				.attr("width", w)
 				.attr("height", h)
 				.attr("fill", "grey");
-		
-				// Get university data from CSV
-				d3.csv("./colleges.csv", function(csv) {
+			
+			// Get university data from CSV
+			d3.csv("./colleges.csv", function(csv) {
 				var universityCount = csv.length;
 				console.log("Parsing " + universityCount + " universities");
 				universities = csv;
 				parseUniversitySummaryData(universities);
 				universities.forEach(parseIndividualUniversityData);
 				afterDataLoad();
-				});
-		
-				// Parse university stats
-				var parseUniversitySummaryData = function(universityData) {
-		
+			});
+			
+			// Parse university stats
+			var parseUniversitySummaryData = function(universityData) {
+				
 				// Collect costs into a separate temporary array
 				var costs = universityData.map( function(d) {
-				return parseInt(d.salary);
+					return parseInt(d.salary);
 				});
-		
+				
 				// Calculate maximum and minimum tuition amounts across universities
 				maximumCosts = d3.max(costs);
 				minimumCosts = d3.min(costs);
-		
+				
 				// TODO: Gather salary data
-				};
+			};
 		
-				// Parsing and formatting of raw data from CSV file
-				var parseIndividualUniversityData = function(university) {
+			// Parsing and formatting of raw data from CSV file
+			var parseIndividualUniversityData = function(university) {
 				// console.log(university.name + ":");
 				var totalPeople = +university.total_faculty + +university.undergrads + +university.grads;
 				// console.log("\tTotal people: " + totalPeople);
@@ -98,221 +98,136 @@
 				university.female = +university.female / 100;
 				university.id = parseInt(university.id);
 				// console.log("\t" + ": " + university.undergrads + ":" + university.grads + ":" + university.total_faculty);
-				};
-		
-				// var stackedCharts;
-		
-				var buildBubbles = function() {
+			};
+			
+			// var stackedCharts;
+			
+			var buildBubbles = function() {
 				var bubbleCharts = svg.append("g")
-				.attr("id", "bubbles").attr("transform", "translate(0, "+outerMargin+")");
+					.attr("id", "bubbles")
+					.attr("transform", "translate(0, "+outerMargin+")");
 		
 				bubbleCharts.append("rect")
-				.attr("width", bubbleView.width)
-				.attr("height", bubbleView.height);
-				};
-		
-				var buildStackedCharts = function() {	
+					.attr("width", bubbleView.width)
+					.attr("height", bubbleView.height);
+			};
+			
+			var buildStackedCharts = function() {	
 				var regionMargin = 2;
-		
+				
 				var localY = bubbleView.height + outerMargin + regionMargin;
-		
+				
 				var stackedCharts = svg.append("g")
-				.attr("id", "stackedCharts")
-				.attr("transform", "translate(0,"+localY+")");
+					.attr("id", "stackedCharts")
+					.attr("transform", "translate(0,"+localY+")");
 		
 				var stackedChartRegions = stackedCharts.selectAll("g")
-				.data(universities)
-				.enter()
-				.append("g");
+					.data(universities)
+					.enter()
+					.append("g");
 		
 				var regionWidth = barView.width / universities.length;
 		
-				stackedChartRegions.attr("transform", function(d, i) {
-				return "translate("+(regionWidth*i)+",0)";
-				});
+				stackedChartRegions.attr("transform", function(d, i) { return "translate("+(regionWidth*i)+",0)"; });
 		
 				stackedChartRegions.append("image")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", regionWidth - regionMargin)
-				.attr("width", regionWidth - regionMargin)
-				.attr("xlink:href", function(d) { return d.logo; });
-		
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", regionWidth - regionMargin)
+					.attr("width", regionWidth - regionMargin)
+					.attr("xlink:href", function(d) { return d.logo; });
+				
 				var chartRegionHeight = ((barView.height - regionWidth - regionMargin - outerMargin) / 2);
-		
+				
 				console.log("chartRegionHeight: " + chartRegionHeight);
 				console.log("chartRegionWidth: " + regionWidth);
-		
+				
 				var ratioChartHeight = chartRegionHeight - regionMargin;
 				var ratioBarMargin = 1;
 				var numOfBars = 4;
 				var ratioBarWidth = (regionWidth - (numOfBars-1)*ratioBarMargin) / numOfBars;
 				console.log("ratioBarWidth: " + ratioBarWidth);
-		
+				
 				// students/faculty ratio
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate(0,"+regionWidth+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.undergrads; })
-				.attr("width", ratioBarWidth)
-				.attr("fill", "green");
-		
+					.attr("transform", "translate(0,"+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.undergrads; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "green");
+				
 				var off=function(d) { return ratioChartHeight * d.undergrads; }
 				console.log("offset: " + function(d) { return ratioChartHeight * d.undergrads; });
 		
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate(0,"+regionWidth+(function(d) { return ratioChartHeight * d.undergrads; })+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.grads; })
-				.attr("width", ratioBarWidth)
-				.attr("fill", "brown");
-		
+					.attr("transform", function(d) { return "translate(0," + (regionWidth + ratioChartHeight * d.undergrads) + ")"; })
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.grads; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "brown");
+				
 				// male/female ratio
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate("+ratioBarWidth+","+regionWidth+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.in_state; })
-				.attr("width", ratioBarWidth)
-				.attr("fill", "blue");
-		
+					.attr("transform", "translate("+ratioBarWidth+","+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.in_state; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "blue");
+				
 				// residence ratio
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate("+ratioBarWidth*2+","+regionWidth+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.in_state; })
-				.attr("width", ratioBarWidth)
-				.attr("fill", "pink");
-		
+					.attr("transform", "translate("+ratioBarWidth*2+","+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.in_state; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "pink");
+				
 				// ethnicity ratio
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate("+ratioBarWidth*3+","+regionWidth+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.white; })
-				.attr("width", ratioBarWidth)
-				.attr("fill", "gray");
-		
+					.attr("transform", "translate("+ratioBarWidth*3+","+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.white; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "gray");
+				
 				// average faculty salary
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate(0,"+(regionWidth+chartRegionHeight)+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.salary/maximumCosts; })
-				.attr("width", regionWidth/2 - regionMargin)
-				.attr("fill", "red");
-		
+					.attr("transform", "translate(0,"+(regionWidth+chartRegionHeight)+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.salary/maximumCosts; })
+					.attr("width", regionWidth/2 - regionMargin)
+					.attr("fill", "red");
+				
 				// enrollment fees
 				stackedChartRegions.append("rect")
-				.attr("transform", "translate("+regionWidth/2+","+(regionWidth+chartRegionHeight)+")")
-				.attr("x", 0)
-				.attr("y", 0)
-				.attr("height", function(d) { return ratioChartHeight * d.fees/maximumCosts; })
-				.attr("width", regionWidth/2 - regionMargin)
-				.attr("fill", "green");
-				};
-		
-				// Continue page setup after data has been loaded and parsed
-				var afterDataLoad = function() {
+					.attr("transform", "translate("+regionWidth/2+","+(regionWidth+chartRegionHeight)+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.fees/maximumCosts; })
+					.attr("width", regionWidth/2 - regionMargin)
+					.attr("fill", "green");
+			};
+			
+			// Continue page setup after data has been loaded and parsed
+			var afterDataLoad = function() {
 				buildBubbles();
 				buildStackedCharts();
-				};
-		
-				// var data = d3.nest().key(function(d) { return d.name; } ).sortKeys(d3.ascending).entries(universities);
-		
-				// var stacked = svg.selectAll("g").data({ratios:[[10,20,30,4&nbsp;0],[25,25,30,20]]}).enter().append("g");
-		
-				function RatioStackedBarChart(university) {
+			};
+			
+			// var data = d3.nest().key(function(d) { return d.name; } ).sortKeys(d3.ascending).entries(universities);
+			
+			// var stacked = svg.selectAll("g").data({ratios:[[10,20,30,4&nbsp;0],[25,25,30,20]]}).enter().append("g");
+			
+			function RatioStackedBarChart(university) {
 				svg.selectAll("circle").data(university.ethnicities).enter().append("circle").attr("x", 5).attr("y", function(d) {return d;}).attr("r", 5);
-				};
-		
-				// var dataset = [ 25, 7, 5, 26, 11, 8, 25, 14, 23, 19,
-				// 14, 11, 22, 29, 11, 13, 12, 17, 18, 10,
-				// 24, 18, 25, 9, 3 ];
-		
-				// var dataset = [];
-				// for (var i = 0; i < 25; ++i) {
-				// var newNumber = Math.random() * 30;
-				// dataset = dataset.concat(newNumber);
-				// }
-		
-				// var dataset = [5, 10, 15, 20, 25];
-		
-				// var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
-				// 11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
-		
-				// var circles = svg.selectAll("circle")
-				// .data(dataset)
-				// .enter()
-				// .append("circle");
-				//
-				// circles.attr("cx", function(d, i) {
-				// return (i * 50) + 25;
-				// })
-				// .attr("cy", h/2)
-				// .attr("r", function(d) {
-				// return d;
-				// })
-				// .attr("fill", "yellow")
-				// .attr("stroke", "orange")
-				// .attr("stroke-width", function(d) { return d/2; });
-		
-				// d3.select("body")
-				// .selectAll("p")
-				// .data(dataset)
-				// .enter()
-				// .append("p")
-				// .text( function(d) { return d; } )
-				// .style("color", function(d) {
-				// if (d > 15)
-				// return "red";
-				// else
-				// return "black";
-				// }
-				// );
-		
-				// svg.selectAll("rect")
-				// .data(dataset)
-				// .enter()
-				// .append("rect")
-				// .attr("x", function(d, i) { return i * (w / dataset.length); })
-				// .attr("y", function(d) { return h - d * 4; })
-				// .attr("width", w / dataset.length - barPadding)
-				// .attr("height", function(d) { return d * 4; })
-				// .attr("fill", function(d) {
-				// return "rgb(0, 0, " + d * 10 + ")";
-				// });
-		
-				// svg.selectAll("text")
-				// .data(dataset)
-				// .enter()
-				// .append("text")
-				// .text(function(d) { return d; })
-				// .attr("x", function(d, i) {
-				// return i * (w / dataset.length) + (w / dataset.length - barPadding) / 2;
-				// })
-				// .attr("y", function(d) {
-				// return h - (d * 4) + 14;
-				// })
-				// .attr("font-family", "sans-serif")
-				// .attr("font-size", "11px")
-				// .attr("fill", "white")
-				// .attr("text-anchor", "middle");
-		
-		// d3.select("body")
-		// .selectAll("div")
-		// .data(dataset)
-		// .enter()
-		// .append("div")
-		// .attr("class", "bar")
-		// .style("height", function(d) {
-		// var barHeight = d * 5;
-		// return barHeight + "px";
-		// }
-		// );
+			};
+			
 		</script>
-		</body>
-		</html>		
+	</body>
+</html>
