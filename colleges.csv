@@ -26,4 +26,4 @@ id,name,salary,fees,total_faculty,undergrads,grads,in_state,out_of_state,interna
 26,University of Texas - Austin,90800,24714,2462,38437,12675,88,8,4,0,7,93,5,20,0,5,18,0,0,50,2,49,51,./images/texas.png
 27,University of Washington,90300,24059,3551,29022,13422,73,15,12,0,11,89,10,6,1,3,26,1,5,47,0,48,52,./images/washington.png
 30,Virginia Polytechnic Institute and State University,93600,23869,2219,23700,7236,68,29,2,1,2,98,3,4,0,4,8,0,3,75,3,58,42,./images/vt.png
-,,82200,,,,,,,,,,,,,,,,,,,,,,
+31,University of Wisconsin-Madison,82200,,,,,,,,,,,,,,,,,,,,,,./images/wisconsin.png
