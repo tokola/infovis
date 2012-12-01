@@ -2,8 +2,10 @@
 	<head>
 		<title>D3 Tests</title>
 		<link rel="stylesheet" href="css/reset.css" type="text/css">
-		<script type= "text/javascript" src="javascript/jquery-1.8.3.min.js"></script>
+		<link rel="stylesheet" href="css/tipsy.css" type="text/css">
+		<script type= "text/javascript" src="javascript/jquery-1.8.3.min.js"></script>		
 		<script type="text/javascript" src="javascript/d3.v2.js"></script>
+		<script type= "text/javascript" src="javascript/jquery.tipsy.js"></script>
 		<style type="text/css">			
 			div#visualization {
 				text-align: left;
@@ -61,6 +63,38 @@
 		var restaurantCategories = ["american", "african", "asian", "european", "latin_american", "middle_eastern", "mediterranean", "mexican", "uncategorized"];
 		var categorySortOrder = ["american", "african", "asian", "european", "latin_american", "middle_eastern", "mediterranean", "mexican", "uncategorized"];
 		var universityStats = ["statuses", "ethnicities", "residencies", "people", "genders"];
+		var descriptions = {
+			people: {
+				undergrads: "Undergraduate Students",
+				grads: "Graduate Students",
+				faculty: "Faculty"
+			},
+			genders: {
+				male: "Males",
+				female: "Females"
+			},
+			statuses: {
+				full_time: "Full-Time Students",
+				part_time: "Part-Time Students"
+			},
+			residencies: {
+				in_state: "In State Students",
+				out_of_state: "Out of State Students",
+				international: "International Students",
+				unknown_residence: "Unknown Residence"
+			},
+			ethnicities: {
+				nonresident_alien: "Non-Resident Alien",
+				hispanic: "Hispanic",
+				islander: "Islander",
+				black: "Black/African-American",
+				asian: "Asian",
+				alaskan: "Alaskan",
+				unknown_race: "Unknown Race",
+				white: "White/Caucasian",
+				mixed_race: "Mixed Race"
+			}
+		};
 		var universityStatsSortOrder = ["people", "genders", "statuses", "residencies","ethnicities"];
 		var stackedSortOrders = {
 			people: ["undergrads", "grads", "faculty"],
@@ -69,6 +103,7 @@
 			residencies: ["in_state", "out_of_state", "international", "unknown_residence"],
 			ethnicities: ["nonresident_alien","hispanic","islander","black","asian","alaskan","unknown_race","white","mixed_race"]
 		};
+		
 		var colors = {
 			people: {
 				undergrads: "red",
@@ -389,6 +424,8 @@
 							for (j = 0; j < stackedSortOrders[currentStat].length; j++) {
 								var obj = {};
 								obj.category = stackedSortOrders[currentStat][j];
+								obj.stat = currentStat;
+								obj.description = descriptions[currentStat][stackedSortOrders[currentStat][j]];
 								obj.color = colors[currentStat][stackedSortOrders[currentStat][j]];
 								obj.value = d[currentStat][stackedSortOrders[currentStat][j]];
 								obj.height = stackedBarHeight * obj.value;
@@ -412,7 +449,18 @@
 						.attr("height", function(d) { return d.height; })
 						.attr("width", function(d) { return d.width; })
 						.attr("fill", function(d) { return d.color; })
-						.on("mouseover", doIt);
+						
+						$('svg rect').tipsy({
+							fade: true,
+							gravity: $.fn.tipsy.autoWE,
+							opacity: 0.8, 
+							html: true, 
+							title: function() {
+								var d = this.__data__;
+								var percent = d.value * 100;
+								return d.description + ": " + percent.toFixed(0) + "%";
+							}
+						});
 				} else {
 					g.data([]);
 				}
