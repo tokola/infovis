@@ -100,8 +100,8 @@
 			people: ["undergrads", "grads", "faculty"],
 			genders: ["male", "female"],
 			statuses: ["full_time", "part_time"],
-			residencies: ["in_state", "out_of_state", "international", "unknown_residence"],
-			ethnicities: ["nonresident_alien","hispanic","islander","black","asian","alaskan","unknown_race","white","mixed_race"]
+			residencies: ["out_of_state", "in_state", "international", "unknown_residence"],
+			ethnicities: ["white", "asian", "nonresident_alien", "hispanic", "islander", "black", "alaskan", "unknown_race", "mixed_race"]
 		};
 		
 		var colors = {
@@ -449,17 +449,12 @@
 						.attr("height", function(d) { return d.height; })
 						.attr("width", function(d) { return d.width; })
 						.attr("fill", function(d) { return d.color; })
+						.attr("title", function(d) { var percent = d.value * 100; return d.description + ": " + percent.toFixed(0) + "%"; });
 						
 						$('svg rect').tipsy({
 							fade: true,
 							gravity: $.fn.tipsy.autoWE,
-							opacity: 0.8, 
-							html: true, 
-							title: function() {
-								var d = this.__data__;
-								var percent = d.value * 100;
-								return d.description + ": " + percent.toFixed(0) + "%";
-							}
+							html: true
 						});
 				} else {
 					g.data([]);
