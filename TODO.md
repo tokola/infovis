@@ -8,7 +8,7 @@
 - Highlight the selected/sorted by attribute
 - Make sort by style functionality, clicking on a bubble or style name and
 - Highlight the selected/sorted by restaurant style
-- Make bubble tooltip (includes: business count, review count, rating)
+- Make bubble tooltip (includes: business count, review count, rating) **(COMPLETE)**
 - Set restaurant style names on y-axis (or elsewhere)
 - Add grid in bubble area
 - Set 2 pix margins between universties

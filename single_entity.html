@@ -404,7 +404,16 @@
 				.attr("r", function(d) { return circleRadiusScale(d.averageStars()); })
 				.attr("cx", function (d) { return dimensions.columns.width() / 2; })
 				.attr("fill", function(d) { return d3.hsl(30,1,circleColorScale(d.totalReviews)).toString(); })
-				.attr("cy", function (d, i) { return ((dimensions.bubbles.height() / categorySortOrder.length) * i) + 25; });
+				.attr("cy", function (d, i) { return ((dimensions.bubbles.height() / categorySortOrder.length) * i) + 25; })
+				.attr("title", function(d) {
+					return "Restaurants: "+d.totalRestaurants+"<br />Reviews: "+d.totalReviews+"<br />Average stars: "+d.averageStars().toFixed(2);
+				});
+			
+			$("svg circle").tipsy({
+				fade: true,
+				gravity: $.fn.tipsy.autoWE,
+				html: true
+			});
 					
 			universityElements.selectAll("image")
 				.data(function(d) { return [d.logo]; })
