@@ -13,6 +13,7 @@
 				width: 100%;
 				height: 100%;
 			}
+			bar .active 
 		</style>
 	</head>
 	<body>
@@ -62,7 +63,7 @@
 		var dataFilesLoaded = 0;
 		var restaurantCategories = ["american", "african", "asian", "european", "latin_american", "middle_eastern", "mediterranean", "mexican", "uncategorized"];
 		var categorySortOrder = ["american", "african", "asian", "european", "latin_american", "middle_eastern", "mediterranean", "mexican", "uncategorized"];
-		var universityStats = ["statuses", "ethnicities", "residencies", "people", "genders"];
+		var universityStats = ["ethnicities", "residencies", "people", "genders"];
 		var descriptions = {
 			people: {
 				undergrads: "Undergraduate Students",
@@ -95,7 +96,7 @@
 				mixed_race: "Mixed Race"
 			}
 		};
-		var universityStatsSortOrder = ["people", "genders", "statuses", "residencies","ethnicities"];
+		var universityStatsSortOrder = ["people", "genders", "residencies","ethnicities"];
 		var stackedSortOrders = {
 			people: ["undergrads", "grads", "faculty"],
 			genders: ["male", "female"],
@@ -369,6 +370,15 @@
 				.append("svg")
 				.attr("width", dimensions.svg.width())
 				.attr("height", dimensions.svg.height());
+			
+			universities = universities.sort(function(a, b) {
+					if (a["people"]["faculty"] < b["people"]["faculty"])
+						return 1;
+					else if (a["people"]["faculty"] > b["people"]["faculty"])
+						return -1;
+					else
+						return 0;
+				});
 			
 			var universityElements = svg.selectAll("g")
 				.data(universities)
