@@ -1,17 +1,16 @@
 - Check review count tabulation **(COMPLETE)**
 - Transitions
 - Fix tooltips **(COMPLETE)**
-- Change ethnicities using 'other' column (new .csv file and code below)
+- Change ethnicities using 'other' column (new .csv file and code below) **(COMPLETE)**
 - Change graph colors (code below) **(COMPLETE)**
 - Add $-bars with tooltips
-- Make sort by university functionality , clikcing on an attribute name and
-- Highlight the selected/sorted by attribute
+- Make sort by university functionality, clicking on an attribute name and highlight the selected/sorted by attribute **(COMPLETE)**
 - Make sort by style functionality, clicking on a bubble or style name and
 - Highlight the selected/sorted by restaurant style
 - Make bubble tooltip (includes: business count, review count, rating) **(COMPLETE)**
 - Set restaurant style names on y-axis (or elsewhere)
 - Add grid in bubble area
-- Set 2 pix margins between universities **(COMPLETE)**
+- Set 2px margins between universities **(COMPLETE)**
 - Set logos equal size to graph width
 - Put average rating line per category
 - Desaturate all other attributes on rollover of attribute
@@ -57,7 +56,7 @@
 		}
 	};`
 
-- Add Other to ethnicities and change order:
+- Add Other to ethnicities and change order: **(COMPLETE)**
 
 	`ethnicities: {
 		nonresident_alien: "Non-Resident Alien",
