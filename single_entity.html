@@ -153,13 +153,11 @@
 				for (var prop in university.restaurantStats) {
 					reviews.push(university.restaurantStats[prop]["totalReviews"]);
 				}
-				console.log(reviews.sort(function(a,b){return a - b}));
 				extrema.push(d3.max(reviews));
 				extrema.push(d3.min(reviews));
 			});
 			restaurantInfo.mostReviews = d3.max(extrema);
 			restaurantInfo.leastReviews = d3.min(extrema);
-			console.log([restaurantInfo.mostReviews, restaurantInfo.leastReviews]);
 		};
 		
 		// Parse the data for all universities
@@ -218,7 +216,7 @@
 		// Get a university by name
 		var getUniversityByName = function(name, array) {
 			var result = array.filter( function(u) { if (u.name == name) return true; } )[0];
-			if (result === undefined) console.log("errant name: " + name);
+			if (result === undefined) console.log("Errant name: " + name);
 			else return result;
 		};
 					
