@@ -41,22 +41,6 @@
 			leastReviews: 10000000
 		};
 		
-		// // Bubble view properties
-		// var bubbleView = {
-		// 	width: w,
-		// 	height: 0.6 * h
-		// };
-		// 
-		// // Bar view properties
-		// var barView = {
-		// 	width: w,
-		// 	height: h - bubbleView.height
-		// };
-		// 
-		// console.log("h: " + h);
-		// console.log("bubbleView.height: " + bubbleView.height);
-		// console.log("barView.height: " + barView.height);
-		
 		// Parse CSV data
 		var universities, restaurants;
 		var dataFiles = 2;
@@ -155,6 +139,20 @@
 		var parseRestaurantsData = function(csv) {
 			console.log("Parsing " + csv.length + " restaurants");
 			restaurants.forEach(parseRestaurantData);
+			
+			var extrema = [];
+			universities.forEach(function(university) {
+				var reviews = [];
+				for (var prop in university.restaurantStats) {
+					reviews.push(university.restaurantStats[prop]["totalReviews"]);
+				}
+				console.log(reviews.sort(function(a,b){return a - b}));
+				extrema.push(d3.max(reviews));
+				extrema.push(d3.min(reviews));
+			});
+			restaurantInfo.mostReviews = d3.max(extrema);
+			restaurantInfo.leastReviews = d3.min(extrema);
+			console.log([restaurantInfo.mostReviews, restaurantInfo.leastReviews]);
 		};
 		
 		// Parse the data for all universities
@@ -186,12 +184,6 @@
 			
 			university.restaurantStats[restaurant.category].totalStars += +restaurant.stars;
 			university.restaurantStats[restaurant.category].totalReviews += +restaurant.review_count;
-			
-			if (university.restaurantStats[restaurant.category].totalReviews > restaurantInfo.mostReviews)
-				restaurantInfo.mostReviews = university.restaurantStats[restaurant.category].totalReviews
-			
-			if (university.restaurantStats[restaurant.category].totalReviews < restaurantInfo.leastReviews)
-				restaurantInfo.leastReviews = university.restaurantStats[restaurant.category].totalReviews
 			
 			university.restaurantStats[restaurant.category].totalRestaurants++;
 		};
@@ -394,9 +386,9 @@
 				.range([0, (dimensions.rows.bubbles.height() / 2)])
 				.exponent(1.5);
 			
-			var circleColorScale = d3.scale.linear()
-				.domain([restaurantInfo.leastReviews, restaurantInfo.mostReviews])
-				.range([0.40,0.95]);
+			var circleColorScale = d3.scale.log()
+				.domain([restaurantInfo.mostReviews, restaurantInfo.leastReviews])
+				.range([0.25,0.95]);
 			
 			universityElements.selectAll("circle")
 				.data(function(d) { return sortedRestaurantStats(d); })

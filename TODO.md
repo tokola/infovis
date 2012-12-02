@@ -1,6 +1,6 @@
-- Check review count tabulation
+- Check review count tabulation **(COMPLETE)**
 - Transitions
-- Fix tooltips
+- Fix tooltips **(COMPLETE)**
 - Change ethnicities using 'other' column (new .csv file and code below)
 - Change graph colors (code below) **(COMPLETE)**
 - Add $-bars with tooltips
