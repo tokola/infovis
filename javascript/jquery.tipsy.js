@@ -8,13 +8,52 @@
     function maybeCall(thing, ctx) {
         return (typeof thing == 'function') ? (thing.call(ctx)) : thing;
     }
-    
+
+    // CAUTION the current implementation does not allow for tipsied elements to stay out of DOM (in between events)
+    // i.e. don't remove, store, then re-insert tipsied elements (and why would you want to do that anyway?)
+    var garbageCollect = (function() {
+        var currentInterval;
+        var to = null;
+        var tipsies = [];
+
+        function _do() {
+            for (var i = 0; i < tipsies.length;) {
+                var t = tipsies[i];
+                // FIXME? the 2nd (non-paranoid) check is from the link below, it should be replaced if a better way is found
+                // http://stackoverflow.com/questions/4040715/check-if-cached-jquery-object-is-still-in-dom
+                if (t.options.gcInterval === 0 || t.$element.closest('body').length === 0) {
+                    t.hoverState = 'out';
+                    t.hide();
+                    tipsies.splice(i,1);
+                } else {
+                    i++;
+                }
+            }
+        }
+        function _loop() {
+            to = setTimeout(function() { _do(); _loop(); }, currentInterval);
+        }
+
+        return function(t) {
+            if (t.options.gcInterval === 0) return;
+
+            if (to && t.options.gcInterval < currentInterval) {
+                clearTimeout(to); to = null;
+                currentInterval = t.options.gcInterval;
+            }
+            tipsies.push(t);
+            if (!to) _loop();
+        };
+    })();
+
     function Tipsy(element, options) {
         this.$element = $(element);
         this.options = options;
         this.enabled = true;
         this.fixTitle();
+        garbageCollect(this);
     }
+
     
     Tipsy.prototype = {
         show: function() {
@@ -86,7 +125,7 @@
                         t.$tip.stop();
                         t.tipHovered = set_hover;
                         if (!set_hover){
-                            if (t.options.delayOut === 0) {
+                            if (t.options.delayOut === 0 && t.options.trigger != 'manual') {
                                 t.hide();
                             } else {
                                 setTimeout(function() { 
@@ -132,6 +171,7 @@
                     title = $e.children(title_name).html();
                 } else{
                     title = $e.attr(title_name);
+                    if (typeof title == 'undefined') title = ''
                 }
                 
             } else if (typeof o.title == 'function') {
@@ -166,16 +206,20 @@
         if (options === true) {
             return this.data('tipsy');
         } else if (typeof options == 'string') {
-            var tipsy = this.data('tipsy');
-            if (tipsy) tipsy[options]();
+            $(this).each(function(i,el){
+              if ($(el).data('tipsy')) {
+                  tipsy = $(el).data('tipsy')
+                  tipsy[options]();
+              }
+            });
             return this;
         }
         
         options = $.extend({}, $.fn.tipsy.defaults, options);
 
         if (options.hoverlock && options.delayOut === 0) {
-	    options.delayOut = 100;
-	}
+            options.delayOut = 100;
+        }
         
         function get(ele) {
             var tipsy = $.data(ele, 'tipsy');
@@ -211,7 +255,9 @@
                 setTimeout(to, options.delayOut);
             }    
         }
-
+        
+        if (!options.live) this.each(function() { get(this); });
+        
         if (options.trigger != 'manual') {
             var binder = options.live ? 'live' : 'bind',
                 eventIn = options.trigger == 'hover' ? 'mouseenter' : 'focus',
@@ -229,6 +275,7 @@
         delayOut: 0,
         fade: false,
         fallback: '',
+        gcInterval: 0,
         gravity: 'n',
         html: false,
         live: false,
@@ -273,9 +320,9 @@
      $.fn.tipsy.autoBounds = function(margin, prefer) {
 		return function() {
 			var dir = {ns: prefer[0], ew: (prefer.length > 1 ? prefer[1] : false)},
-			    boundTop = $(document).scrollTop() + margin,
-			    boundLeft = $(document).scrollLeft() + margin,
-			    $this = $(this);
+                boundTop = $(document).scrollTop() + margin,
+                boundLeft = $(document).scrollLeft() + margin,
+                $this = $(this);
 
 			if ($this.offset().top < boundTop) dir.ns = 'n';
 			if ($this.offset().left < boundLeft) dir.ew = 'w';
