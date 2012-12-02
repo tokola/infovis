@@ -2,7 +2,7 @@
 - Transitions
 - Fix tooltips
 - Change ethnicities using 'other' column (new .csv file and code below)
-- Change graph colors (code below)
+- Change graph colors (code below) **(COMPLETE)**
 - Add $-bars with tooltips
 - Make sort by university functionality , clikcing on an attribute name and
 - Highlight the selected/sorted by attribute
