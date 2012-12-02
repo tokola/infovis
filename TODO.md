@@ -16,12 +16,12 @@
 - Put average rating line per category
 - Desaturate all other attributes on rollover of attribute
 - Leave border around graph and space below for the following (I can give you graphics/placeholders):
-- Put project name... URIF! [top] 
+- Put project name... URIF! [top] **(COMPLETE)**
 - Put "sorted by:" field [bottom]
 - Put legend explaining encodings [bottom]
 - Put instructions in space next to legend [bottom]
   - The last 3 can be placed in a collapsable semi-transparent window, in order to save space. The "sorted by: _____" should be always visible and the legend and info could be hidden/revealed. (just an idea)
-- Change stacked bar colors:
+- Change stacked bar colors: **(COMPLETE)**
 
 	`var colors = {
 		people: {
