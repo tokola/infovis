@@ -3,7 +3,7 @@
 		<title>D3 Tests</title>
 		<link rel="stylesheet" href="css/reset.css" type="text/css">
 		<link rel="stylesheet" href="css/tipsy.css" type="text/css">
-		<script type= "text/javascript" src="javascript/jquery-1.8.3.min.js"></script>		
+		<script type= "text/javascript" src="javascript/jquery-1.8.3.min.js"></script>
 		<script type="text/javascript" src="javascript/d3.v2.js"></script>
 		<script type= "text/javascript" src="javascript/jquery.tipsy.js"></script>
 		<style type="text/css">
@@ -84,7 +84,8 @@
 				alaskan: "Alaskan",
 				unknown_race: "Unknown Race",
 				white: "White/Caucasian",
-				mixed_race: "Mixed Race"
+				mixed_race: "Mixed Race",
+				other: "Other"
 			}
 		};
 		var universityStatsSortOrder = ["people", "genders", "residencies","ethnicities"];
@@ -93,7 +94,7 @@
 			genders: ["male", "female"],
 			statuses: ["full_time", "part_time"],
 			residencies: ["out_of_state", "in_state", "international", "unknown_residence"],
-			ethnicities: ["white", "asian", "nonresident_alien", "hispanic", "islander", "black", "alaskan", "unknown_race", "mixed_race"]
+			ethnicities: ["white","hispanic","asian","nonresident_alien","other"]
 		};
 		
 		var colors = {
@@ -290,7 +291,8 @@
 				alaskan: +university.alaskan / 100,
 				unknown_race: +university.unknown_race / 100,
 				white: +university.white / 100,
-				mixed_race: +university.mixed_race / 100
+				mixed_race: +university.mixed_race / 100,
+				other: +university.other / 100
 			};
 			delete university.nonresident_alien;
 			delete university.hispanic;
@@ -301,6 +303,7 @@
 			delete university.unknown_race;
 			delete university.white;
 			delete university.mixed_race;
+			delete university.other;
 			
 			university.genders = {
 				male: +university.male / 100,
