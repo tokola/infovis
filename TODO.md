@@ -11,7 +11,7 @@
 - Make bubble tooltip (includes: business count, review count, rating) **(COMPLETE)**
 - Set restaurant style names on y-axis (or elsewhere)
 - Add grid in bubble area
-- Set 2 pix margins between universties
+- Set 2 pix margins between universities **(COMPLETE)**
 - Set logos equal size to graph width
 - Put average rating line per category
 - Desaturate all other attributes on rollover of attribute

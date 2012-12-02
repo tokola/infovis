@@ -427,7 +427,7 @@
 				.attr("xlink:href", function(d) { return d; });
 			
 			var numberOfStackedBars = universityStatsSortOrder.length;
-			var stackedBarWidth = dimensions.columns.width() / numberOfStackedBars;
+			var stackedBarWidth = (dimensions.columns.width() / numberOfStackedBars) - 2;
 			var stackedBarHeight = dimensions.bars.height();
 			
 			for (i = 0; i < universityStats.length; i++) {
@@ -449,7 +449,7 @@
 								obj.value = d[currentStat][stackedSortOrders[currentStat][j]];
 								obj.height = stackedBarHeight * obj.value;
 								obj.width = stackedBarWidth;
-								obj.x = 0;
+								obj.x = 1;
 								if (j == 0) obj.y = 0;
 								else obj.y = data[j-1].y + data[j-1].height;
 								data.push(obj);
