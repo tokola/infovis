@@ -66,6 +66,8 @@
 			}
 		};
 		
+		var mainSortKey = "stats";
+		
 		// General restaurant data
 		var restaurantInfo = {
 			mostReviews: 0,
@@ -402,8 +404,18 @@
 			// }
 			// 
 			universities = universities.sort(function(a, b) {
-				var compareA = a[stackedCategoryOrder[0]][stackedSubcategoryOrders[stackedCategoryOrder[0]][0]];
-				var compareB = b[stackedCategoryOrder[0]][stackedSubcategoryOrders[stackedCategoryOrder[0]][0]];
+				var compareA, compareB;
+				if (mainSortKey == "restaurants") {
+					var aStats = a.restaurantStats[styleOrder[0]];
+					var bStats = b.restaurantStats[styleOrder[0]];
+					if (aStats === undefined) compareA = 0.0;
+					else compareA = aStats.averageStars();
+					if (bStats === undefined) compareB = 0.0;
+					else compareB = bStats.averageStars();
+				} else {
+					compareA = a[stackedCategoryOrder[0]][stackedSubcategoryOrders[stackedCategoryOrder[0]][0]];
+					compareB = b[stackedCategoryOrder[0]][stackedSubcategoryOrders[stackedCategoryOrder[0]][0]];
+				}
 				return compareB - compareA;
 			});
 			
@@ -719,6 +731,7 @@
 		
 		var updateStyleOrder = function(d, key) {
 			if (key == "stat") {
+				mainSortKey = "stats";
 				var index = stackedCategoryOrder.indexOf(d.category);
 				stackedCategoryOrder.splice(index, 1);
 				stackedCategoryOrder.unshift(d.category);
@@ -736,6 +749,13 @@
 					stackedSubcategoryOrders[d.category].unshift(d.subcategory);
 				}
 				console.log(stackedSubcategoryOrders[d.category]);
+			} else {
+				mainSortKey = "restaurants";
+				console.log(styleOrder);
+				var index = styleOrder.indexOf(d);
+				styleOrder.splice(index, 1);
+				styleOrder.unshift(d);
+				console.log(styleOrder);
 			}
 			draw(false);
 		}
