@@ -45,10 +45,8 @@
 		</style>
 	</head>
 	<body>
-	<!--
 		<div id="header">URIF</div>
 		<div id="visualization"></div>
-	-->
 	</body>
 	<script type="text/javascript">
 		
@@ -342,14 +340,14 @@
 			// }
 		};
 		
-		var svg = d3.select("body").append("svg");
+		// var svg = d3.select("body").append("svg");
 		
 		var buildEntireChart = function(div, isResizing) {
 			
 			var dimensions = {
 				svg: {
-					width: function() { return window.innerWidth; },
-					height: function() { return window.innerHeight; }
+					width: function() { return $(div).width(); },
+					height: function() { return $(div).height(); }
 					// width: function() { return $(div).width(); },
 					// height: function() { return $(div).height(); }
 				},
@@ -388,21 +386,21 @@
 				}
 			}
 			
-			// var svg;
-			// 
-			// // Clear main div of drawing
-			// if (isResizing) {
-			// 	$(div).empty();
-			// 
-			// 	// Main SVG element
-			// 	svg = d3.select(div)
-			// 		.append("svg")
-			// 		.attr("width", dimensions.svg.width())
-			// 		.attr("height", dimensions.svg.height());
-			// } else {
-			// 	svg = d3.select("svg");
-			// }
-			// 
+			var svg;
+			
+			// Clear main div of drawing
+			if (isResizing) {
+				$(div).empty();
+			
+				// Main SVG element
+				svg = d3.select(div)
+					.append("svg")
+					.attr("width", dimensions.svg.width())
+					.attr("height", dimensions.svg.height());
+			} else {
+				svg = d3.select("svg");
+			}
+			
 			universities = universities.sort(function(a, b) {
 				var compareA, compareB;
 				if (mainSortKey == "restaurants") {
@@ -420,7 +418,6 @@
 			});
 			
 			var currentColumnOrder = universities.map(function(d) { return d.name; });
-			// console.log(currentColumnOrder);
 			
 			var columns = svg.selectAll("g.column")
 				.data(universities, function(d) { return d.name; });
@@ -486,7 +483,7 @@
 					updateStyleOrder(style, "restaurant");
 				})
 				.transition()
-				.duration(3000)
+				.duration(1000)
 				.attr("r", function(d) { return circleRadiusScale(d.averageStars()); });
 			
 			$("svg circle").tipsy({
@@ -498,7 +495,13 @@
 			var logos = svg.selectAll("image.universityLogo")
 				.data(universities, function(d) { return d.name; });
 			
-			logos.transition().duration(2000).attr("transform", function(d, i) { return "translate("+(i * dimensions.columns.width())+","+(dimensions.bubbles.height())+")"; });
+			logos.transition()
+				.duration(2000)
+				.attr("transform", function(d, i) {
+					return "translate("+(i * dimensions.columns.width())+","+(dimensions.bubbles.height())+")";
+				})
+				.attr("height", function(d) { return dimensions.columns.width(); })
+				.attr("width", function(d) { return dimensions.columns.width(); });
 			
 			logos.enter()
 				.append("image")
@@ -507,7 +510,11 @@
 				.attr("y", 0)
 				.attr("height", function(d) { return dimensions.columns.width(); })
 				.attr("width", function(d) { return dimensions.columns.width(); })
-				.attr("xlink:href", function(d) { return d.logo; });
+				.attr("xlink:href", function(d) { return d.logo; })
+				.attr("opacity", 0.0)
+				.transition()
+				.duration(2000)
+				.attr("opacity", 1.0);
 			
 			var numberOfStackedBars = stackedCategoryOrder.length;
 			var stackedBarWidth = (dimensions.columns.width() / numberOfStackedBars) - 2;
@@ -521,185 +528,105 @@
 				.classed("stackedChart", true)
 			
 			for (c in stackedCategoryOrder) {
-				// console.log("main c: " + c);
 				var category = stackedCategoryOrder[c];
-				// console.log("category: " + category);
-				
-				var bars = stackedCharts.selectAll("g." + category)
-					.data(function(d) { return [d[category]] });
-				
-				// console.log("bars: ");
-				// console.log(bars);
-				
-				bars.enter()
-					.append("g")
-					.classed(category, true);
-				
-				// console.log("bars.enter():");
-				// console.log(bars.enter());
-				
-				var rects = bars.selectAll("rect")
-					.data(function(d) {
-						// console.log("category in data: " + category);
-						// console.log(category);
-						var data = [];
-						for (i in stackedSubcategoryOrders[category]) {
-							var subcategory = stackedSubcategoryOrders[category][i];
-							var entry = {
-								subcategory: subcategory,
-								value: d[subcategory]
-							};
-							data.push(entry);
-						}
-						return data;
-					});
-				
-				rects.enter()
-					.append("rect")
-					.attr("class", function(d) { return category + "-" + d.subcategory; })
-					.classed("highlighted", true)
-					.attr("height", function(d) {
-						return d.value * stackedBarHeight;
-					})
-					.attr("width", stackedBarWidth)
-					.attr("y", function(d, i) {
-						if (i == 0) return dimensions.bars.y();
-						else {
-							var accumulatedHeight = 0;
-							for (j = 0; j < i; j++) {
-								accumulatedHeight += this.parentNode.__data__[stackedSubcategoryOrders[category][j]] * stackedBarHeight;
-							}
-							return accumulatedHeight + dimensions.bars.y();
-						}
-					})
-					.on("click", function(d) { 
-						var className = this.className.baseVal;
-						var thisCat = className.substring(0,className.indexOf("-"));
-						updateStyleOrder({subcategory: d.subcategory, category: thisCat}, "stat");
-					})
-					.on("mouseover", function() {
-						var highlightedClassName = d3.select(this).attr("class").split(" ")[0];
-						$("rect").each(function() {
-							var thisClassName = d3.select(this).attr("class").split(" ")[0];
-							if (thisClassName != highlightedClassName) {
-								d3.select(this).classed("highlighted", false);
-								d3.select(this).classed("muted", true);
-							}
-						});
-					})
-					.on("mouseout", function() {
-						var highlightedClassName = d3.select(this).attr("class").split(" ")[0];
-						$("rect").each(function() {
-							var thisClassName = d3.select(this).attr("class").split(" ")[0];
-							if (thisClassName != highlightedClassName) {
-								d3.select(this).classed("highlighted", true);
-								d3.select(this).classed("muted", false);
-							}
-						});
-					})
-					.attr("title", function(d) { 
-						var percent = d.value * 100;
-						// console.log(this.parentNode.parentNode.__data__);
-						return descriptions[d.subcategory] + ": " + percent.toFixed(0) + "%"; 
-					})
-					.transition()
-					.duration(500)
-					.attr("x", function(d) {
-						// console.log("c in enter x: " + c);
-						var index = currentColumnOrder.indexOf(this.parentNode.parentNode.__data__.name);
-						var subindex = stackedCategoryOrder.indexOf(category);
-						return (index * dimensions.columns.width()) + (subindex * stackedBarWidth);
-					});
+				// console.log(category);
+				for (s in stackedSubcategoryOrders[category]) {
+					var subcategory = stackedSubcategoryOrders[category][s];
+					// console.log(order);
 					
-					$('svg rect').tipsy({
-						fade: true,
-						gravity: $.fn.tipsy.autoWE,
-						html: true
-					});
+					var rects = stackedCharts.selectAll("rect." + category + "-" + subcategory)
+						.data(function(d) {
+							var data = {
+								category: category,
+								subcategory: subcategory,
+								university: this.parentNode.__data__.name,
+								value: d[category][subcategory]
+							}
+							// console.log(data);
+							return ([data]);
+						});
 					
 					rects.transition()
 						.duration(2000)
-						.attr("x", function(datum, i, context) {
+						.attr("height", function(d) { return stackedBarHeight * d.value; })
+						.attr("x", function(d) {
+							var index = currentColumnOrder.indexOf(d.university);
+							var subindex = stackedCategoryOrder.indexOf(d.category);
+							// console.log(subindex);
+							return (index * dimensions.columns.width()) + (subindex * stackedBarWidth);
+						})
+						.attr("y", function(d) {
+							var index = stackedSubcategoryOrders[d.category].indexOf(d.subcategory);
+							var accumulatedHeight = 0;
+							// console.log(index);
+							for (i = 0; i < index; i++) {
+								accumulatedHeight += this.parentNode.__data__[d.category][stackedSubcategoryOrders[d.category][i]] * stackedBarHeight;
+							}
+							return accumulatedHeight + dimensions.bars.y();
+						})
+						.attr("width", stackedBarWidth)
+						.attr("height", function(d) { return stackedBarHeight * d.value; });
+					
+					rects.enter()
+						.append("rect")
+						.attr("class", category + "-" + subcategory)
+						.classed("highlighted", true)
+						.attr("width", stackedBarWidth)
+						.attr("height", function(d) { return stackedBarHeight * d.value; })
+						.attr("x", function(d) {
+							var index = currentColumnOrder.indexOf(d.university);
+							var subindex = stackedCategoryOrder.indexOf(d.category);
+							return (index * dimensions.columns.width()) + (subindex * stackedBarWidth);
+						})
+						.attr("y", dimensions.svg.height())
+						.attr("title", function(d) { 
+							var percent = d.value * 100;
+							return descriptions[d.subcategory] + ": " + percent.toFixed(0) + "%"; 
+						})
+						.on("click", function(d) { 
 							var className = this.className.baseVal;
 							var thisCat = className.substring(0,className.indexOf("-"));
-							var index = currentColumnOrder.indexOf(this.parentNode.parentNode.__data__.name);
-							var subindex = stackedCategoryOrder.indexOf(thisCat);
-							return (index * dimensions.columns.width()) + (subindex * stackedBarWidth);
+							updateStyleOrder({subcategory: d.subcategory, category: thisCat}, "stat");
+						})
+						.on("mouseover", function() {
+							var highlightedClassName = d3.select(this).attr("class").split(" ")[0];
+							$("rect").each(function() {
+								var thisClassName = d3.select(this).attr("class").split(" ")[0];
+								if (thisClassName != highlightedClassName) {
+									d3.select(this).classed("highlighted", false);
+									d3.select(this).classed("muted", true);
+								}
+							});
+						})
+						.on("mouseout", function() {
+							var highlightedClassName = d3.select(this).attr("class").split(" ")[0];
+							$("rect").each(function() {
+								var thisClassName = d3.select(this).attr("class").split(" ")[0];
+								if (thisClassName != highlightedClassName) {
+									d3.select(this).classed("highlighted", true);
+									d3.select(this).classed("muted", false);
+								}
+							});
+						})
+						.transition()
+						.duration(1000)
+						.attr("y", function(d) {
+							var index = stackedSubcategoryOrders[d.category].indexOf(d.subcategory);
+							var accumulatedHeight = 0;
+							// console.log(index);
+							for (i = 0; i < index; i++) {
+								accumulatedHeight += this.parentNode.__data__[d.category][stackedSubcategoryOrders[d.category][i]] * stackedBarHeight;
+							}
+							return accumulatedHeight + dimensions.bars.y();
 						});
-						// .attr("y", function(datum, i, context) {
-						// 	var className = this.className.baseVal;
-						// 	var thisCat = className.substring(0,className.indexOf("-"));
-						// 	if (i == 0) return dimensions.bars.y();
-						// 	else {
-						// 		accumulatedHeight = 0;
-						// 		for (j = 0; j < i; j++) {
-						// 			accumulatedHeight += this.parentNode.__data__[stackedSubcategoryOrders[thisCat][j]] * stackedBarHeight;
-						// 		}
-						// 		return accumulatedHeight + dimensions.bars.y();
-						// 	}
-						// });
+						
+						$('svg rect').tipsy({
+							fade: true,
+							gravity: $.fn.tipsy.autoWE,
+							html: true
+						});
+				}
 			}
-			
-			// // WORKING STATS CODE
-			// for (i = 0; i < stackedCategories.length; i++) {
-			// 	currentStat = stackedCategories[i];
-			// 	columns.append("g").attr("class", currentStat);
-			// 	
-			// 	var g = columns.selectAll("g." + currentStat);
-			// 	
-			// 	if (stackedCategoryOrder.indexOf(currentStat) != -1) {
-			// 		var statCharts = g.selectAll("rect." + currentStat)
-			// 			.data(function(d) {
-			// 				var data = [];
-			// 				for (j = 0; j < stackedSubcategoryOrders[currentStat].length; j++) {
-			// 					var obj = {};
-			// 					obj.category = stackedSubcategoryOrders[currentStat][j];
-			// 					obj.stat = currentStat;
-			// 					obj.description = descriptions[currentStat][stackedSubcategoryOrders[currentStat][j]];
-			// 					obj.color = colors[currentStat][stackedSubcategoryOrders[currentStat][j]];
-			// 					obj.value = d[currentStat][stackedSubcategoryOrders[currentStat][j]];
-			// 					obj.height = stackedBarHeight * obj.value;
-			// 					obj.width = stackedBarWidth;
-			// 					obj.x = 1;
-			// 					if (j == 0) obj.y = 0;
-			// 					else obj.y = data[j-1].y + data[j-1].height;
-			// 					data.push(obj);
-			// 				}
-			// 				return data;
-			// 			});
-			// 			
-			// 		statCharts.transition()
-			// 			.duration(1000)
-			// 			.attr("transform", function() {
-			// 				return "translate("+(stackedCategoryOrder.indexOf(currentStat)*stackedBarWidth)+","+dimensions.bars.y()+")"; 
-			// 			})
-			// 			.attr("x", function(d) { return d.x; })
-			// 			.attr("y", function(d) { return d.y; });
-			// 		
-			// 		statCharts.enter()
-			// 			.append("rect")
-			// 			.attr("transform", function() {
-			// 				return "translate("+(stackedCategoryOrder.indexOf(currentStat)*stackedBarWidth)+","+dimensions.bars.y()+")"; 
-			// 			})
-			// 			.attr("class", function(d) { return currentStat; })
-			// 			// .attr("id", function(d) { return d.category; })
-			// 			.attr("x", function(d) { return d.x; })
-			// 			.attr("y", function(d) { return d.y; })
-			// 			.attr("height", function(d) { return d.height; })
-			// 			.attr("width", function(d) { return d.width; })
-			// 			.attr("fill", function(d) { return d.color; })
-			// 			.attr("title", function(d) { var percent = d.value * 100; return d.description + ": " + percent.toFixed(0) + "%"; })
-			// 			.on("click", updatestyleOrder)
-			// 			
-			// 			$('svg rect').tipsy({
-			// 				fade: true,
-			// 				gravity: $.fn.tipsy.autoWE,
-			// 				html: true
-			// 			});
-			// 	} else {
-			// 		g.data([]);
-			// 	}
-			// }
 		};
 		
 		// Initial build
@@ -732,30 +659,24 @@
 		var updateStyleOrder = function(d, key) {
 			if (key == "stat") {
 				mainSortKey = "stats";
-				var index = stackedCategoryOrder.indexOf(d.category);
-				stackedCategoryOrder.splice(index, 1);
-				stackedCategoryOrder.unshift(d.category);
-				// console.log(stackedCategoryOrder);
-			
-				// var end = stackedCategoryOrder.splice(stackedCategoryOrder.length - 1, 1);
-				// stackedCategoryOrder.unshift(end[0]);
-			
-				console.log(stackedSubcategoryOrders[d.category]);
-				console.log(d.subcategory);
-				index = stackedSubcategoryOrders[d.category].indexOf(d.subcategory);
-				console.log(index);
-				if (index != 0) {
-					stackedSubcategoryOrders[d.category].splice(index, 1);
+				
+				var categoryIndex = stackedCategoryOrder.indexOf(d.category);
+				var subcategoryIndex = stackedSubcategoryOrders[d.category].indexOf(d.subcategory);
+				
+				if (categoryIndex != 0) {
+					stackedCategoryOrder.splice(categoryIndex, 1);
+					stackedCategoryOrder.unshift(d.category);
+				}
+				
+				if (subcategoryIndex != 0) {
+					stackedSubcategoryOrders[d.category].splice(subcategoryIndex, 1);
 					stackedSubcategoryOrders[d.category].unshift(d.subcategory);
 				}
-				console.log(stackedSubcategoryOrders[d.category]);
 			} else {
 				mainSortKey = "restaurants";
-				console.log(styleOrder);
 				var index = styleOrder.indexOf(d);
 				styleOrder.splice(index, 1);
 				styleOrder.unshift(d);
-				console.log(styleOrder);
 			}
 			draw(false);
 		}
