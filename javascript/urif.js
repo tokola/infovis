@@ -1,27 +1,75 @@
-var stackedChartRegions;
+/************************************************************
+ * University Restaurant Information Finder
+ * Copyright (c) 2012, Brennon Bortz and Panagiotis Apostolellis
+ * All rights reserved.
+ * 
+ * brennon@brennonbortz.com / www.brennonbortz.com
+ ************************************************************/
+/************************************************************
+ * d3.js
+ * Copyright (c) 2012, Michael Bostock
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * 
+ * * The name Michael Bostock may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL MICHAEL BOSTOCK BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ************************************************************/
 
-// General university data
+/************************************************************
+ * Global variables
+ ************************************************************/
+
+// Global university data
 var universityInfo = {
 	costs: { min: 0, max: 0 },
 	salaries: { min: 0, max: 0 }
 };
 
-var mainSortKey = "stats";
-
-// General restaurant data
-var restaurantInfo = {
-	mostReviews: 0,
-	leastReviews: 10000000
-};
-
+// Global restaurant data
+var restaurantInfo = { mostReviews: 0, leastReviews: 10000000 };
 var uniqueRestaurantStatID = 0;
 
-// Parse CSV data
+// Datasets
 var universities, restaurants;
+
+// Number of CSV files
 var dataFiles = 2;
 var dataFilesLoaded = 0;
+
+// Sort orders
+// Initial sort by either "stats" or "restaurants"
+var mainSortKey = "stats";
 var styleOrder = ["american", "african", "asian", "european", "latin_american", "middle_eastern", "mediterranean", "mexican", "uncategorized"];
-var stackedCategories = ["ethnicities", "residencies", "people", "genders"];
+var stackedCategoryOrder = ["people", "genders", "residencies","ethnicities"];
+var stackedSubcategoryOrders = {
+	people: ["undergrads", "grads", "faculty"],
+	genders: ["male", "female"],
+	statuses: ["full_time", "part_time"],
+	residencies: ["out_of_state", "in_state", "international", "unknown_residence"],
+	ethnicities: ["white","hispanic","asian","nonresident_alien","other"]
+};
+
+// Description strings for attributes
 var descriptions = {
 	undergrads: "Undergraduate Students",
 	grads: "Graduate Students",
@@ -54,60 +102,11 @@ var descriptions = {
 	mexican: "Mexican",
 	uncategorized: "Uncategorized"
 };
-var stackedCategoryOrder = ["people", "genders", "residencies","ethnicities"];
-var stackedSubcategoryOrders = {
-	people: ["undergrads", "grads", "faculty"],
-	genders: ["male", "female"],
-	statuses: ["full_time", "part_time"],
-	residencies: ["out_of_state", "in_state", "international", "unknown_residence"],
-	ethnicities: ["white","hispanic","asian","nonresident_alien","other"]
-};
 
-var colors = {
-	people: {
-		undergrads: "rgb(150,235,0)",
-		grads: "rgb(222,222,40)",
-		faculty: "rgb(235,160,40)"
-	},
-	genders: {
-		male: "rgb(150,210,250)",
-		female: "pink"
-	},
-	statuses: {
-		full_time: "white",
-		part_time: "black"
-	},
-	residencies: {
-		in_state: "rgb(240,100,130)",
-		out_of_state: "rgb(170,160,210)",
-		international: "purple",
-		unknown_residence: "gray"
-	},
-	ethnicities: {
-		white: "rgb(220,220,220)",
-		hispanic: "rgb(180,130,80)",
-		asian: "rgb(255,240,80)",
-		nonresident_alien: "rgb(60,160,60)",
-		islander: "peachpuff",
-		black: "olive",
-		alaskan: "lightseagreen",
-		unknown_race: "lightgreen",
-		mixed_race: "darksalmon",
-		other: "black"
-	}
-};
 
-var importCSVData = function(callback) {
-	d3.csv("./data/restaurants.csv", function(csv) {
-		restaurants = csv;
-		callback();
-	});
-	
-	d3.csv("./data/colleges.csv", function(csv) {
-		universities = csv;
-		callback();
-	});
-};
+/************************************************************
+ * Parser functions for restaurant data
+ ************************************************************/
 
 // Parse the data for all restaurants
 var parseRestaurantsData = function() {
@@ -126,9 +125,19 @@ var parseRestaurantsData = function() {
 	restaurantInfo.leastReviews = d3.min(extrema);
 };
 
-// Parse the data for all universities
-var parseUniversitiesData = function() {
-	universities.forEach(parseIndividualUniversityData);
+// Parse stats for an individual restaurant
+var parseRestaurantData = function(restaurant) {
+	restaurant.category = restaurant.category.toUnderscored();
+	var university = getUniversityByName(restaurant.university_name, universities);
+	university.restaurants.push(restaurant);
+	
+	if (university.restaurantStats[restaurant.category] === undefined)
+		university.restaurantStats[restaurant.category] = new restaurantCategoryStats(university.name, restaurant.category, uniqueRestaurantStatID++);
+	
+	university.restaurantStats[restaurant.category].totalStars += +restaurant.stars;
+	university.restaurantStats[restaurant.category].totalReviews += +restaurant.review_count;
+	
+	university.restaurantStats[restaurant.category].totalRestaurants++;
 };
 
 // Object to hold restaurant category statistics
@@ -145,41 +154,14 @@ var restaurantCategoryStats = function(university, category, id) {
 	};
 };
 
-// Parse the stats for an individual restaurant
-var parseRestaurantData = function(restaurant) {
-	restaurant.category = restaurant.category.toUnderscored();
-	var university = getUniversityByName(restaurant.university_name, universities);
-	university.restaurants.push(restaurant);
-	
-	if (university.restaurantStats[restaurant.category] === undefined)
-		university.restaurantStats[restaurant.category] = new restaurantCategoryStats(university.name, restaurant.category, uniqueRestaurantStatID++);
-	
-	university.restaurantStats[restaurant.category].totalStars += +restaurant.stars;
-	university.restaurantStats[restaurant.category].totalReviews += +restaurant.review_count;
-	
-	university.restaurantStats[restaurant.category].totalRestaurants++;
-};
 
-var sortedRestaurantStats = function(university) {
-	var data = [];
-	for (i = 0; i < styleOrder.length; i++) {
-		if (university.restaurantStats[styleOrder[i]] === undefined)
-			data.push(new restaurantCategoryStats());
-		else
-			data.push(university.restaurantStats[styleOrder[i]])
-	}
-	return data;
-};
+/************************************************************
+ * Parser functions for university data
+ ************************************************************/
 
-var toUnderscored = function() {
-	return this.replace(/\s/g, "_").toLowerCase();
-};
-
-String.prototype.toUnderscored = toUnderscored;
-
-// Get a university by name
-var getUniversityByName = function(name, array) {
-	return array.filter( function(u) { if (u.name == name) return true; } )[0];
+// Parse the data for all universities
+var parseUniversitiesData = function() {
+	universities.forEach(parseIndividualUniversityData);
 };
 
 // Parse university stats
@@ -268,6 +250,40 @@ var parseIndividualUniversityData = function(university) {
 	
 	university.restaurantStats = {};
 };
+
+
+/************************************************************
+ * Helper functions
+ ************************************************************/
+
+// Helper function to convert space-separated to underscore-separated strings
+var toUnderscored = function() {
+	return this.replace(/\s/g, "_").toLowerCase();
+};
+String.prototype.toUnderscored = toUnderscored;
+
+// Get a university by name
+var getUniversityByName = function(name, array) {
+	return array.filter( function(u) { if (u.name == name) return true; } )[0];
+};
+
+// Import data from CSV files
+var importCSVData = function(callback) {
+	d3.csv("./data/restaurants.csv", function(csv) {
+		restaurants = csv;
+		callback();
+	});
+	
+	d3.csv("./data/colleges.csv", function(csv) {
+		universities = csv;
+		callback();
+	});
+};
+
+
+/************************************************************
+ * Drawing functions
+ ************************************************************/
 
 var buildEntireChart = function(div, isResizing) {
 	
@@ -570,12 +586,45 @@ var buildEntireChart = function(div, isResizing) {
 	}
 };
 
+
+/************************************************************
+ * Event handler helpers
+ ************************************************************/
+var updateStyleOrder = function(d, key) {
+	if (key == "stat") {
+		mainSortKey = "stats";
+
+		var categoryIndex = stackedCategoryOrder.indexOf(d.category);
+		var subcategoryIndex = stackedSubcategoryOrders[d.category].indexOf(d.subcategory);
+
+		if (categoryIndex != 0) {
+			stackedCategoryOrder.splice(categoryIndex, 1);
+			stackedCategoryOrder.unshift(d.category);
+		}
+
+		if (subcategoryIndex != 0) {
+			stackedSubcategoryOrders[d.category].splice(subcategoryIndex, 1);
+			stackedSubcategoryOrders[d.category].unshift(d.subcategory);
+		}
+	} else {
+		mainSortKey = "restaurants";
+		var index = styleOrder.indexOf(d);
+		styleOrder.splice(index, 1);
+		styleOrder.unshift(d);
+	}
+	draw(false);
+}
+
+
+/************************************************************
+ * Setup routines
+ ************************************************************/
 // Initial build
-function start() {
+var start = function() {
 	importCSVData(csvCallback);
 };
 
-function parseCSVData() {
+var parseCSVData = function() {
 	parseUniversitySummaryData();
 	parseUniversitiesData();
 	parseRestaurantsData();
@@ -589,31 +638,6 @@ var csvCallback = function() {
 var draw = function(isResizing) {
 	buildEntireChart("div#visualization", isResizing);
 };
-
-var updateStyleOrder = function(d, key) {
-	if (key == "stat") {
-		mainSortKey = "stats";
-		
-		var categoryIndex = stackedCategoryOrder.indexOf(d.category);
-		var subcategoryIndex = stackedSubcategoryOrders[d.category].indexOf(d.subcategory);
-		
-		if (categoryIndex != 0) {
-			stackedCategoryOrder.splice(categoryIndex, 1);
-			stackedCategoryOrder.unshift(d.category);
-		}
-		
-		if (subcategoryIndex != 0) {
-			stackedSubcategoryOrders[d.category].splice(subcategoryIndex, 1);
-			stackedSubcategoryOrders[d.category].unshift(d.subcategory);
-		}
-	} else {
-		mainSortKey = "restaurants";
-		var index = styleOrder.indexOf(d);
-		styleOrder.splice(index, 1);
-		styleOrder.unshift(d);
-	}
-	draw(false);
-}
 
 window.onresize = function() {
 	draw(true);
