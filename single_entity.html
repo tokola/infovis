@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<title>D3 Tests</title>
+		<link rel="stylesheet" href="css/reset.css" type="text/css">
+		<link rel="stylesheet" href="css/tipsy.css" type="text/css">
+		<link href='http://fonts.googleapis.com/css?family=Holtwood+One+SC|Mouse+Memoirs' rel='stylesheet' type='text/css'>
+		<script type= "text/javascript" src="javascript/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="javascript/d3.v2.js"></script>
+		<script type= "text/javascript" src="javascript/jquery.tipsy.js"></script>
+		<style type="text/css">
+			div#visualization {
+				text-align: left;
+				margin: auto;
+				width: 95%;
+				height: 95%;
+			}
+			div#header {
+				text-align: center;
+				font-size: 36px;
+				margin-top: 5px;
+				font-family: 'Holtwood One SC', serif;
+			}
+			rect.people-undergrads.highlighted { fill: rgb(150,235,0); }
+			rect.people-grads.highlighted { fill: rgb(222,222,40); }
+			rect.people-faculty.highlighted { fill: rgb(235,160,40); }
+			rect.genders-male.highlighted { fill: rgb(150,210,250); }
+			rect.genders-female.highlighted { fill: pink; }
+			rect.statuses-full_time.highlighted { fill: white; }
+			rect.statuses-part_time.highlighted { fill: black; }
+			rect.residencies-in_state.highlighted { fill: rgb(240,100,130); }
+			rect.residencies-out_of_state.highlighted { fill: rgb(170,160,210); }
+			rect.residencies-international.highlighted { fill: purple; }
+			rect.residencies-unknown_residence.highlighted { fill: gray; }
+			rect.ethnicities-white.highlighted { fill: rgb(220,220,220); }
+			rect.ethnicities-hispanic.highlighted { fill: rgb(180,130,80); }
+			rect.ethnicities-asian.highlighted { fill: rgb(255,240,80); }
+			rect.ethnicities-nonresident_alien.highlighted { fill: rgb(60,160,60); }
+			rect.ethnicities-islander.highlighted { fill: peachpuff; }
+			rect.ethnicities-black.highlighted { fill: olive; }
+			rect.ethnicities-alaskan.highlighted { fill: lightseagreen; }
+			rect.ethnicities-unknown_race.highlighted { fill: lightgreen; }
+			rect.ethnicities-mixed_race.highlighted { fill: darksalmon; }
+			rect.ethnicities-other.highlighted { fill: black; }
+			rect.muted { fill: grey; }
+			text.restaurantLabel { font-family: 'Mouse Memoirs', sans-serif; }
+		</style>
+	</head>
+	<body>
+		<div id="header">URIF</div>
+		<div id="visualization"></div>
+		<script type="text/javascript" src="javascript/urif.js"></script>
+	</body>
+</html>

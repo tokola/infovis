@@ -9,12 +9,14 @@
 			}
 		</style>
 	</head>
-	<body>	
+	<body>
 		<script type="text/javascript">
 			// Overall dimensions
 			var outerMargin = 30;
 			var w = window.innerWidth - (outerMargin * 2);
 			var h = window.innerHeight - (outerMargin * 2);
+			
+			var stackedChartRegions;
 			
 			// Bubble view properties
 			var bubbleView = {
@@ -35,9 +37,10 @@
 			// General university data
 			var maximumCosts = 0;
 			var minimumCosts = 0;
-			var universities;
+			var universities, restaurants;
 			
 			var svg = d3.select("body")
+<<<<<<< HEAD
 		.append("svg")
 		.attr("width", w)
 		.attr("height", h)
@@ -364,18 +367,263 @@
 		// .attr("font-size", "11px")
 		// .attr("fill", "white")
 		// .attr("text-anchor", "middle");
+=======
+				.append("svg")
+				.attr("width", w)
+				.attr("height", h)
+				.attr("fill", "grey");
+			
+			// Get university data from CSV
+			d3.csv("./colleges.csv", function(csv) {
+				var universityCount = csv.length;
+				console.log("Parsing " + universityCount + " universities");
+				universities = csv;
+				parseUniversitySummaryData(universities);
+				universities.forEach(parseIndividualUniversityData);
+				parseRestaurantCSV();
+			});
+			
+			// Get restaurant data from CSV
+			var parseRestaurantCSV = function() {
+				d3.csv("./restaurants.csv", function(csv) {
+					var restaurantCount = csv.length;
+					console.log("Parsing " + restaurantCount + " restaurants");
+					restaurants = csv;
+					restaurants.forEach(parseRestaurantData);
+					afterDataLoad();
+				});
+			};
+			
+			var parseRestaurantData = function(restaurant) {
+				var universityName = restaurant.university_name;
+				var university = getUniversityByName(universityName, universities);
+				university.restaurants.push(restaurant);
+			};
+			
+			// Get a university by name
+			var getUniversityByName = function(name, array) {
+				var result = array.filter( function(u) { if (u.name == name) return true; } )[0];
+				if (result === undefined) console.log("errant name: " + name);
+				else return result;
+			}
+			
+			// Parse university stats
+			var parseUniversitySummaryData = function(universityData) {
+				
+				// Collect costs into a separate temporary array
+				var costs = universityData.map( function(d) {
+					return parseInt(d.salary);
+				});
+				
+				// Calculate maximum and minimum tuition amounts across universities
+				maximumCosts = d3.max(costs);
+				minimumCosts = d3.min(costs);
+				
+				// TODO: Gather salary data
+			};
+>>>>>>> upstream/master
 		
-		// d3.select("body")
-		// .selectAll("div")
-		// .data(dataset)
-		// .enter()
-		// .append("div")
-		// .attr("class", "bar")
-		// .style("height", function(d) {
-		// var barHeight = d * 5;
-		// return barHeight + "px";
-		// }
-		// );
+			// Parsing and formatting of raw data from CSV file
+			var parseIndividualUniversityData = function(university) {
+				// console.log(university.name + ":");
+				var totalPeople = +university.total_faculty + +university.undergrads + +university.grads;
+				// console.log("\tTotal people: " + totalPeople);
+				university.salary = +university.salary;
+				// console.log("salary:"+university.salary);
+				university.fees = +university.fees;
+				university.total_faculty = +university.total_faculty / totalPeople;
+				university.undergrads = +university.undergrads / totalPeople;
+				university.grads = +university.grads / totalPeople;	
+				university.in_state = +university.in_state / 100;
+				university.out_of_state = +university.out_of_state / 100;
+				university.international = +university.international / 100;
+				university.unknown_residence = +university.unknown_residence / 100;
+				university.part_time = +university.part_time / 100;
+				university.full_time = +university.full_time / 100;
+				university.nonresident_alien = +university.nonresident_alien / 100;
+				university.hispanic = +university.hispanic / 100;
+				university.islander = +university.islander / 100;
+				university.black = +university.black / 100;
+				university.asian = +university.asian / 100;
+				university.alaskan = +university.alaskan / 100;
+				university.unknown_race = +university.unknown_race / 100;
+				university.white = +university.white / 100;
+				university.mixed_race = +university.mixed_race / 100;
+				university.male = +university.male / 100;
+				university.female = +university.female / 100;
+				university.id = parseInt(university.id);
+				university.restaurants = [];
+				// console.log("\t" + ": " + university.undergrads + ":" + university.grads + ":" + university.total_faculty);
+				// console.log(university);
+			};
+			
+			// var stackedCharts;
+			
+			var buildBubbles = function() {
+				var bubbleCharts = svg.append("g")
+					.attr("id", "bubbles")
+					.attr("transform", "translate(0, "+outerMargin+")");
+		
+				bubbleCharts.append("circle")
+					.attr("width", bubbleView.width)
+					.attr("height", bubbleView.height);
+				
+				
+				
+				// var latitudes = restaurants.map(function(d) {
+				// 	return parseFloat(d.latitude);
+				// });
+				// 
+				// var maxLatitude = d3.max(latitudes);
+				// var minLatitude = d3.min(latitudes);
+				// 
+				// console.log("max latitude: " + maxLatitude);
+				// console.log("min latitude: " + minLatitude);
+				// 
+				// var longitudes = restaurants.map(function(d) {
+				// 	return parseFloat(d.longitude);
+				// });
+				// 
+				// 
+				// var maxLongitude = d3.max(longitudes);
+				// var minLongitude = d3.min(longitudes);
+				// 
+				// console.log("max longitude: " + maxLongitude);
+				// console.log("min longitude: " + minLongitude);
+				// 
+				// var latitudeScale = d3.scale.linear().domain([minLatitude, maxLatitude]).range([10, bubbleView.width - 10]);
+				// var longitudeScale = d3.scale.linear().domain([minLongitude, maxLongitude]).range([10, bubbleView.height - 10]);
+				// 
+				// console.log("scaled max latitude: " + latitudeScale(maxLatitude));
+				// console.log("scaled min latitude: " + latitudeScale(minLatitude));
+				// console.log("scaled max longitude: " + longitudeScale(maxLongitude));
+				// console.log("scaled min longitude: " + longitudeScale(minLongitude));
+				// 
+				// bubbleCharts.selectAll("circle")
+				// 	.data(restaurants)
+				// 	.enter()
+				// 	.append("circle")
+				// 	.attr("r", 1)
+				// 	.attr("cx", function(d) { return latitudeScale(d.latitude) + (Math.random() * 20 - 10); })
+				// 	.attr("cy", function(d) { return longitudeScale(d.longitude) + (Math.random() * 20 - 10); })
+			};
+			
+			var buildStackedCharts = function() {	
+				var regionMargin = 2;
+				
+				var localY = bubbleView.height + outerMargin + regionMargin;
+				
+				var stackedCharts = svg.append("g")
+					.attr("id", "stackedCharts")
+					.attr("transform", "translate(0,"+localY+")");
+		
+				stackedChartRegions = stackedCharts.selectAll("g")
+					.data(universities)
+					.enter()
+					.append("g");
+		
+				var regionWidth = barView.width / universities.length;
+		
+				stackedChartRegions.attr("transform", function(d, i) { return "translate("+(regionWidth*i)+",0)"; });
+		
+				stackedChartRegions.append("image")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", regionWidth - regionMargin)
+					.attr("width", regionWidth - regionMargin)
+					.attr("xlink:href", function(d) { return d.logo; });
+				
+				var chartRegionHeight = ((barView.height - regionWidth - regionMargin - outerMargin) / 2);
+				
+				console.log("chartRegionHeight: " + chartRegionHeight);
+				console.log("chartRegionWidth: " + regionWidth);
+				
+				var ratioChartHeight = chartRegionHeight - regionMargin;
+				var ratioBarMargin = 1;
+				var numOfBars = 4;
+				var ratioBarWidth = (regionWidth - (numOfBars-1)*ratioBarMargin) / numOfBars;
+				console.log("ratioBarWidth: " + ratioBarWidth);
+				
+				// students/faculty ratio
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate(0,"+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.undergrads; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "green");
+				
+				var off=function(d) { return ratioChartHeight * d.undergrads; }
+				console.log("offset: " + function(d) { return ratioChartHeight * d.undergrads; });
+		
+				stackedChartRegions.append("rect")
+					.attr("transform", function(d) { return "translate(0," + (regionWidth + ratioChartHeight * d.undergrads) + ")"; })
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.grads; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "brown");
+				
+				// male/female ratio
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate("+ratioBarWidth+","+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.in_state; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "blue");
+				
+				// residence ratio
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate("+ratioBarWidth*2+","+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.in_state; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "pink");
+				
+				// ethnicity ratio
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate("+ratioBarWidth*3+","+regionWidth+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.white; })
+					.attr("width", ratioBarWidth)
+					.attr("fill", "gray");
+				
+				// average faculty salary
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate(0,"+(regionWidth+chartRegionHeight)+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.salary/maximumCosts; })
+					.attr("width", regionWidth/2 - regionMargin)
+					.attr("fill", "red");
+				
+				// enrollment fees
+				stackedChartRegions.append("rect")
+					.attr("transform", "translate("+regionWidth/2+","+(regionWidth+chartRegionHeight)+")")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", function(d) { return ratioChartHeight * d.fees/maximumCosts; })
+					.attr("width", regionWidth/2 - regionMargin)
+					.attr("fill", "green");
+			};
+			
+			// Continue page setup after data has been loaded and parsed
+			var afterDataLoad = function() {
+				buildBubbles();
+				buildStackedCharts();
+			};
+			
+			// var data = d3.nest().key(function(d) { return d.name; } ).sortKeys(d3.ascending).entries(universities);
+			
+			// var stacked = svg.selectAll("g").data({ratios:[[10,20,30,4&nbsp;0],[25,25,30,20]]}).enter().append("g");
+			
+			function RatioStackedBarChart(university) {
+				svg.selectAll("circle").data(university.ethnicities).enter().append("circle").attr("x", 5).attr("y", function(d) {return d;}).attr("r", 5);
+			};
+			
 		</script>
-		</body>
-		</html>		
+	</body>
+</html>
